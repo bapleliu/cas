@@ -3,14 +3,14 @@ source ./ci/functions.sh
 
 runBuild=false
 echo "Reviewing changes that might affect the Gradle build..."
-currentChangeSetAffectsTests
+currentChangeSetAffectsStyle
 retval=$?
 if [ "$retval" == 0 ]
 then
-    echo "Found changes that require the build to run test cases."
+    echo "Found changes that require the build to run static analysis."
     runBuild=true
 else
-    echo "Changes do NOT affect project test cases."
+    echo "Changes do NOT affect project static analysis."
     runBuild=false
 fi
 
@@ -21,21 +21,18 @@ fi
 prepCommand="echo 'Running command...'; "
 gradle="./gradlew $@"
 gradleBuild=""
-gradleBuildOptions="--stacktrace --build-cache --configure-on-demand --no-daemon -DtestCategoryType=MONGODB "
+gradleBuildOptions="--stacktrace --build-cache --configure-on-demand --no-daemon "
 
 echo -e "***********************************************"
 echo -e "Gradle build started at `date`"
 echo -e "***********************************************"
 
-./ci/tests/mongodb/run-mongodb-server.sh
+echo -e "Installing NPM...\n"
+./gradlew npmInstall --stacktrace -q
 
-gradleBuild="$gradleBuild testMongoDb coveralls -x test -x javadoc -x check \
-    -DskipNpmLint=true -DskipGradleLint=true -DskipSass=true -DskipNpmLint=true --parallel \
-    -DskipNodeModulesCleanUp=true -DskipNpmCache=true -DskipNestedConfigMetadataGen=true "
-
-if [[ "${TRAVIS_COMMIT_MESSAGE}" == *"[show streams]"* ]]; then
-    gradleBuild="$gradleBuild -DshowStandardStreams=true "
-fi
+gradleBuild="$gradleBuild spotbugsMain spotbugsTest -x test -x javadoc \
+     -DskipGradleLint=true -DskipSass=true -DskipNestedConfigMetadataGen=true \
+     -DskipNodeModulesCleanUp=true -DskipNpmCache=true --parallel -DshowStandardStreams=true "
 
 if [ -z "$gradleBuild" ]; then
     echo "Gradle build will be ignored since no commands are specified to run."

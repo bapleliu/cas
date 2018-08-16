@@ -1,5 +1,6 @@
 package org.apereo.cas.audit;
 
+import org.apereo.cas.category.RestfulApiCategory;
 import org.apereo.cas.config.CasCoreUtilSerializationConfiguration;
 import org.apereo.cas.configuration.model.core.audit.AuditRestProperties;
 import org.apereo.cas.util.CollectionUtils;
@@ -15,6 +16,7 @@ import org.apereo.inspektr.audit.AuditActionContext;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.core.io.ByteArrayResource;
@@ -40,6 +42,7 @@ import static org.junit.Assert.*;
 })
 @Slf4j
 @ConditionalIgnore(condition = RunningStandaloneCondition.class)
+@Category(RestfulApiCategory.class)
 public class RestAuditTrailManagerTests {
     @ClassRule
     public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
